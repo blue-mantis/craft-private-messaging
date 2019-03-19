@@ -1,0 +1,43 @@
+{
+    "name": "bluemantis/private-messaging",
+    "description": "Allows sending private messages between users",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "private messaging"
+    ],
+    "support": {
+        "docs": "https://github.com/blue-mantis/BM-Private-Messaging/private-messaging/blob/master/README.md",
+        "issues": "https://github.com/blue-mantis/BM-Private-Messaging/private-messaging/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Blue Mantis",
+            "homepage": "https://bluemantis.com/"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+          "bluemantis\\privatemessaging\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Private Messaging",
+        "handle": "private-messaging",
+        "hasCpSettings": false,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/blue-mantis/BM-Private-Messaging/private-messaging/master/CHANGELOG.md",
+        "components": {
+            "privateMessagingService": "bluemantis\\privatemessaging\\services\\PrivateMessagingService"
+        },
+        "class": "bluemantis\\privatemessaging\\PrivateMessaging"
+    }
+}

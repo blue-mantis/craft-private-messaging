@@ -1,0 +1,26 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Private Messaging plugin for Craft CMS
+ *
+ * PrivateMessagingWidget Widget Settings
+ *
+ * @author    Blue Mantis
+ * @copyright Copyright (c) 2019 Blue Mantis
+ * @link      https://bluemantis.com/
+ * @package   PrivateMessaging
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("bluemantis\\privatemessaging\\assetbundles\\privatemessaging\\PrivateMessagingAsset") %}
+
+{{ forms.textField({
+    label: 'Message',
+    instructions: 'Enter a message here.',
+    id: 'message',
+    name: 'message',
+    value: widget['message']})
+}}

@@ -1,0 +1,40 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Private Messaging plugin for Craft CMS 3.x
+ *
+ * Private Messaging index.twig
+ *
+ * @author    Blue Mantis
+ * @copyright Copyright (c) 2019 Blue Mantis
+ * @link      https://bluemantis.com/
+ * @package   PrivateMessaging
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("bluemantis\\privatemessaging\\assetbundles\\privatemessaging\\PrivateMessagingAsset") %}
+{% do view.registerAssetBundle("bluemantis\\privatemessaging\\assetbundles\\indexcpsection\\IndexCPSectionAsset") %}
+
+{% set docsUrl = "https://github.com/https://github.com/blue-mantis/BM-Private-Messaging/private-messaging/blob/master/README.md" %}
+
+{% set title = "Private Messaging" %}
+
+{% set pluginCpUrl = url('private-messaging') %}
+
+{% set iconUrl = view.getAssetManager().getPublishedUrl('@bluemantis/privatemessaging/assetbundles/indexcpsection/dist', true) ~ '/img/Index-icon.svg' %}
+
+{% set extraPageHeaderHtml %}
+    <div class="buttons">
+        <a href="{{ pluginCpUrl }}" class="btn submit add icon">{{ "Click Me!"|t('private-messaging') }}</a>
+    </div>
+{% endset %}
+
+{% set content %}
+    <h2>{{ "Index CP Section body goes here"|t('private-messaging') }}</h2>
+    <img src="{{ iconUrl }}" height="64" width="64" />
+    <p class="textline"></p>
+{% endset %}
