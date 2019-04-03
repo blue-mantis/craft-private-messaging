@@ -5,7 +5,7 @@ A Craft CMS plugin. Grant your site users the power of communication, via privat
 
 # User Guide
 
-##1. Send a private message
+### 1. Send a private message
 
 Add the following form to your template:
 
@@ -29,10 +29,11 @@ Add the following form to your template:
 You will need to set the following form values:
 
  * **redirect** - This should be set to the template to redirect to, upon successfully sending the private message
- * **senderId** - This should be the ID of the user sending the message
+ * **subject** - This should be the subject of the message
+ * **body** - This should be the content of the message
  * **recipientId** - This should be the ID of the user due to receive the message
 
-##2. View messages
+### 2. View messages
 
 To view the logged in users messages, you will need to add the following to your template:
 
@@ -49,10 +50,12 @@ Within this loop you can access the following private message attributes:
 * **message.body** - The body of the message. [**type**: *text*]
 * **message.sender** - The sender user. [**type**: *user object*]
 * **message.recipient** - The recipient user. [**type**: *user object*]
+* **message.siteId** - The id of the site. [**type**: *integer*]
+* **message.thread** - The message thread. [**type**: *thread object*]
 * **message.isRead** - Whether the message has been read. [**type**: *boolean*]
 * **message.dateCreated** - The created dateTime of the message. [**type**: *dateTime*]
 
-##3. View unread message count
+### 3. View unread message count
 
 To view the unread message count for the currently logged in user, you will need to add the following to your template:
 
@@ -60,7 +63,7 @@ To view the unread message count for the currently logged in user, you will need
 {{ craft.privateMessaging.unreadMessageCount }}
 ```
 
-##4. View total message count
+### 4. View total message count
 
 To view the total message count for the currently logged in user, you will need to add the following to your template:
 
@@ -68,7 +71,7 @@ To view the total message count for the currently logged in user, you will need 
 {{ craft.privateMessaging.totalMessageCount }}
 ```
 
-##5. View a message
+### 5. View a message
 
 To access an individual message, you will need to pass the id of a message to your template.
 
@@ -104,7 +107,82 @@ If this method does not return an associated message, it will return null. We ma
 2. **Deleted** - *A message with that ID has been deleted from the database*
 3. **Permissions** - *A message with that ID does not belong to the user trying to access it*
 
-##6. Delete a message
+
+### 6. View threads
+
+To view the logged in users threads, you will need to add the following to your template:
+
+```twig
+{% for thread in craft.privateMessaging.threads %}
+
+{% endfor %}
+```
+
+Within this loop you can access the following message thread attributes:
+
+* **thread.id** - The message ID. [**type**: *integer*]
+* **thread.subject** - The subject of the message. [**type**: *string(255)*]
+* **thread.excerpt** - The body of the message. [**type**: *text*]
+* **thread.siteId** - The id of the site. [**type**: *integer*]
+* **thread.dateCreated** - The created dateTime of the message. [**type**: *dateTime*]
+* **thread.messages** - Array of messages in this thread. [**type**: *array*]
+
+Inside the template, we will use this ID (number) to retrieve the message, but, first we check to ensure we have actually been passed an ID:
+
+```twig
+{% if number is not defined %}
+    {% exit 404 %}
+{% else %}
+```
+
+If we have an ID, then we pass this to the getPrivateMessageThread method (which is a twig extension built into the plugin):
+
+```twig
+{% set thread = number|getPrivateMessageThread %}
+```
+
+**The getPrivateMessageThread method with return a null value when:**
+
+1. **Out of range** - *A thread with that ID doesn't exist in the database*
+2. **Deleted** - *A thread with that ID has been deleted from the database*
+3. **Permissions** - *A thread with that ID does not belong to the user trying to access it*
+
+Threads are only visible to the parties involved in the conversation
+
+### 7. Reply to a message
+
+Add the following form to your template:
+
+```twig
+{% set message = number|getPrivateMessage %}
+
+<form method="post" action="" accept-charset="UTF-8" id="privateMessagingForm" class="message_form">
+	<div id="message">
+		{{ getCsrfInput() }}
+		<input type="hidden" name="action" value="private-messaging/messages/send">
+		<input type="hidden" name="redirect" value="{{"#{siteUrl}message-sent" | hash}}">
+		<input type="hidden" name="subject" value="{{ message.subject }}">
+		<input type="hidden" name="threadId" value="{{ message.thread.id }}">
+		<input type="hidden" name="recipientId" value="{{ message.sender.id }}">
+
+		<div>
+			<label for="message_body" class="required">Message</label>
+			<textarea id="message_body" name="body" form="privateMessagingForm" cols="40" rows="10" placeholder="Type your message here..." required></textarea>
+		</div>
+		<input class="btn submit" type="submit" value="{{ 'Submit'|t }}">
+	</div>
+</form>
+```
+
+You will need to set the following form values:
+
+ * **redirect** - This should be set to the template to redirect to, upon successfully sending the private message
+ * **threadId** - This should be the ID of the conversation thread (use thread id of the message you're replying to
+ * **recipientId** - This should be the ID of the user you're sending the message to
+ * **subject** - This should be the subject of the message
+ * **body** - This should be the content of the message
+
+### 8. Delete a message
 
 Add the following form to your template:
 
