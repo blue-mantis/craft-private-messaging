@@ -48,6 +48,12 @@ class Install extends Migration
             $this->insertDefaultData();
         }
 
+        //$migrator = $this->getMigrator();
+        //foreach ($migrator->getNewMigrations() as $name) {
+            //dd($name);
+            ////$migrator->addMigrationHistory($name);
+        //}
+
         return true;
     }
 

@@ -15,6 +15,8 @@ use bluemantis\privatemessaging\PrivateMessaging;
 use Craft;
 use craft\db\ActiveRecord;
 use craft\records\User;
+use bluemantis\privatemessaging\records\PrivateMessagingThreadsRecord;
+use bluemantis\privatemessaging\models\PrivateMessagingModel;
 
 /**
  * @author    Blue Mantis
@@ -48,6 +50,20 @@ class PrivateMessagingRecord extends ActiveRecord
     public function getRecipient()
     {
       return $this->hasOne(User::class, ['id' => 'recipientId']);
+    }
+
+    public function getThread()
+    {
+      return $this->hasOne(PrivateMessagingThreadsRecord::class, ['id' => 'threadId']);
+    }
+
+    public function getModel()
+    {
+      $model = new PrivateMessagingModel($this->toArray());
+      $model->setSender($this->sender);
+      $model->setRecipient($this->recipient);
+      $model->setThread($this->thread);
+      return $model;
     }
 
     public function rules()

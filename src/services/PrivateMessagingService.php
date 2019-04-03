@@ -13,6 +13,7 @@ namespace bluemantis\privatemessaging\services;
 use bluemantis\privatemessaging\PrivateMessaging;
 use bluemantis\privatemessaging\models\PrivateMessagingModel;
 use bluemantis\privatemessaging\records\PrivateMessagingRecord;
+use bluemantis\privatemessaging\records\PrivateMessagingThreadsRecord;
 
 use Craft;
 use craft\base\Component;
@@ -33,11 +34,24 @@ class PrivateMessagingService extends Component
      */
     public function saveMessage(PrivateMessagingModel $model)
     {
+      $threadId = $model->threadId;
+
+      if(!$threadId){
+        $record = new PrivateMessagingThreadsRecord();
+        $record->excerpt = $this->getExcerpt($model->body, 0, 100);
+        $record->subject = $model->subject;
+        $record->siteId = Craft::$app->sites->getCurrentSite()->id;
+        $record->save();
+
+        $threadId = $record->id;
+      }
+
       $record = new PrivateMessagingRecord();
       $record->setAttributes($model->getAttributes());
       $record->isRead = 0;
-      $record->senderId = Craft::$app->user->id;
+      $record->senderId = Craft::$app->getUser()->getId();
       $record->siteId = Craft::$app->sites->getCurrentSite()->id;
+      $record->threadId = $threadId;
       return $record->save() ? true : false;
     }
 
@@ -48,10 +62,12 @@ class PrivateMessagingService extends Component
      * @return array of bluemantis\privatemessaging\models\PrivateMessagingModel
      */
     public function getMessages($onlyUnread = false) {
+      $this->getThreads();
+
       if (!Craft::$app->getUser()) return [];
 
       $conditions = [
-        'recipientId' => Craft::$app->getUser()->id,
+        'recipientId' => Craft::$app->getUser()->getId(),
         'siteId' => Craft::$app->sites->getCurrentSite()->id];
 
       if ($onlyUnread) {
@@ -65,8 +81,57 @@ class PrivateMessagingService extends Component
         ->all();
 
       $records = array_map([$this, 'assignModel'], $records);
-
       return $records;
+    }
+
+    /**
+     * Get messages by thread
+     *
+     * @return array of bluemantis\privatemessaging\models\PrivateMessagingThreadsModel
+     */
+    public function getThreads() {
+      if (!Craft::$app->getUser()) return [];
+
+      $conditions = ['or',
+        ['craft_private_messaging.recipientId' => Craft::$app->getUser()->getId()],
+        ['craft_private_messaging.senderId' => Craft::$app->getUser()->getId()]
+      ];
+
+      $records = PrivateMessagingThreadsRecord::find()
+        ->joinWith(['messages'])
+        ->where(['craft_private_messaging_threads.siteId' => Craft::$app->sites->getCurrentSite()->id])
+        ->andWhere($conditions)
+        ->orderBy(['id' => SORT_DESC])
+        ->all();
+
+
+      $records = array_map([$this, 'assignModel'], $records);
+      return $records;
+    }
+
+    /**
+     * Getthread
+     *
+     * @return array of bluemantis\privatemessaging\models\PrivateMessagingThreadsModel
+     */
+    public function getThread($id) {
+      if (!Craft::$app->getUser()) return [];
+
+      $conditions = ['or',
+        ['craft_private_messaging.recipientId' => Craft::$app->getUser()->getId()],
+        ['craft_private_messaging.senderId' => Craft::$app->getUser()->getId()]
+      ];
+
+      $thread = PrivateMessagingThreadsRecord::find()
+        ->joinWith(['messages'])
+        ->where([
+          'craft_private_messaging_threads.siteId' => Craft::$app->sites->getCurrentSite()->id,
+          'craft_private_messaging_threads.id' => $id])
+        ->andWhere($conditions)
+        ->one();
+
+      if(!$thread) return null;
+      return $thread->getModel();
     }
 
     /**
@@ -150,19 +215,37 @@ class PrivateMessagingService extends Component
      */
     protected function markMessageAsRead(PrivateMessagingRecord $message){
       $message->isRead = 1;
-			return $message->save();
+            return $message->save();
     }
 
     /**
-     * Delete message
+     * assign to model
      *
      * @param instance of bluemantis\privatemessaging\records\PrivateMessagingRecord
      * @return instance of bluemantis\privatemessaging\models\PrivateMessagingModel
      */
-    protected function assignModel(PrivateMessagingRecord $message){
-      $model = new PrivateMessagingModel($message->toArray());
-      $model->setSender($message->sender);
-      $model->setRecipient($message->recipient);
-      return $model;
+    protected function assignModel($record){
+      return $record->getModel();
+    }
+
+    /**
+     * Extract excerpt from string body
+     *
+     * @param string $str
+     * @param integer $startPos
+     * @param integer $maxLength
+     * @return string
+     */
+    protected function getExcerpt($str, $startPos=0, $maxLength=100){
+      if(strlen($str) > $maxLength) {
+        $excerpt   = substr($str, $startPos, $maxLength-3);
+        $lastSpace = strrpos($excerpt, ' ');
+        $excerpt   = substr($excerpt, 0, $lastSpace);
+        $excerpt  .= '...';
+      } else {
+        $excerpt = $str;
+      }
+
+      return $excerpt;
     }
 }

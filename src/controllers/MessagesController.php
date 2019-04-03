@@ -60,6 +60,7 @@ class MessagesController extends Controller
       $this->message->subject = Craft::$app->request->post('subject');
       $this->message->body = Craft::$app->request->post('body');
       $this->message->recipientId = Craft::$app->request->post('recipientId');
+      $this->message->threadId = Craft::$app->request->post('threadId');
 
       if(!$this->message->validate()){
         return $this->respondWithError();

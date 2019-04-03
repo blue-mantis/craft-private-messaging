@@ -16,6 +16,8 @@ use Craft;
 use craft\base\Model;
 use craft\records\User;
 use craft\elements\User as UserElement;
+use bluemantis\privatemessaging\models\PrivateMessagingThreadsModel;
+use bluemantis\privatemessaging\records\PrivateMessagingThreadsRecord;
 
 /**
  * @author    Blue Mantis
@@ -77,6 +79,11 @@ class PrivateMessagingModel extends Model
     public $siteId;
 
     /**
+     * @var integer
+     */
+    public $threadId;
+
+    /**
      * @var uid
      */
     public $uid;
@@ -101,6 +108,11 @@ class PrivateMessagingModel extends Model
      */
     public $recipient;
 
+    /**
+     * @var PrivateMessagingThreadsRecord
+     */
+    public $thread;
+
     // Public Methods
     // =========================================================================
 
@@ -115,13 +127,14 @@ class PrivateMessagingModel extends Model
             ['body', 'string'],
             ['recipientId', 'exist', 'targetClass' => User::class, 'targetAttribute' => ['recipientId' => 'id']],
             ['recipientId', 'integer', 'message' => 'You need to select recipient'],
+            ['threadId', 'exist', 'targetClass' => PrivateMessagingThreadsRecord::class, 'targetAttribute' => ['recipientId' => 'id']],
         ];
     }
 
     /**
      * set sender object
      *
-     * @param instance ofcraft\records\User
+     * @param instance of craft\records\User
      * @return null
      */
     public function setSender(User $user){
@@ -131,10 +144,20 @@ class PrivateMessagingModel extends Model
     /**
      * set recipient object
      *
-     * @param instance ofcraft\records\User
+     * @param instance of craft\records\User
      * @return null
      */
     public function setRecipient(User $user){
       $this->recipient = new UserElement($user->toArray($this->userColumns));
+    }
+
+    /**
+     * set thread object
+     *
+     * @param instance of PrivateMessagingThreadsRecord
+     * @return null
+     */
+    public function setThread(PrivateMessagingThreadsRecord $thread){
+      $this->thread = new PrivateMessagingThreadsModel($thread->toArray());
     }
 }

@@ -25,6 +25,7 @@ use craft\web\twig\variables\CraftVariable;
 use craft\services\Dashboard;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
+use craft\db\MigrationManager;
 
 use yii\base\Event;
 
@@ -53,7 +54,7 @@ class PrivateMessaging extends Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '1.0.0';
+    public $schemaVersion = '1.0.1';
 
     // Public Methods
     // =========================================================================
@@ -114,8 +115,120 @@ class PrivateMessaging extends Plugin
         );
     }
 
+   /**
+     * Modified install method to as the default one doesn't install migrations properly
+     *
+     * @return null
+     */
+    public function install()
+    {
+        if ($this->beforeInstall() === false) {
+            return false;
+        }
+
+        $migrator = $this->getMigrator();
+
+        // Run the install migration, if there is one
+        if (($migration = $this->createInstallMigration()) !== null) {
+            try {
+                $migrator->migrateUp($migration);
+            } catch (MigrationException $e) {
+                return false;
+            }
+        }
+
+        // Mark all existing migrations as applied
+        foreach ($migrator->getNewMigrations() as $name) {
+            $migrator->migrateUp($this->instantiateMigration($name));
+        }
+
+        $this->isInstalled = true;
+
+        $this->afterInstall();
+
+        return null;
+    }
+
+    /**
+     * Modified uninstall method to as the default one doesn't uninstall migrations properly
+     *
+     * @return null
+     */
+    public function uninstall()
+    {
+        $migrator = $this->getMigrator();
+
+        if ($this->beforeUninstall() === false) {
+            return false;
+        }
+
+        foreach ($this->getAppliedMigrations($migrator) as $name) {
+            $migrator->migrateDown($this->instantiateMigration($name));
+        }
+
+        if (($migration = $this->createInstallMigration()) !== null) {
+            try {
+                $this->getMigrator()->migrateDown($migration);
+            } catch (MigrationException $e) {
+                return false;
+            }
+        }
+
+        $this->afterUninstall();
+
+        return null;
+    }
+
+    /**
+     * Returns the migrations that are applied.
+     *
+     * @return array The list of installed migrations
+     */
+    public function getAppliedMigrations(MigrationManager $migrator): array
+    {
+        $migrations = [];
+
+        // Ignore if the migrations folder doesn't exist
+        if (!is_dir($migrator->migrationPath)) {
+            return $migrations;
+        }
+
+        $history = $migrator->getMigrationHistory();
+        $handle = opendir($migrator->migrationPath);
+
+        while (($file = readdir($handle)) !== false) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            $path = $migrator->migrationPath . DIRECTORY_SEPARATOR . $file;
+
+            if (preg_match('/^(m\d{6}_\d{6}_.*?)\.php$/', $file, $matches) && is_file($path) && isset($history[$matches[1]])) {
+                $migrations[] = $matches[1];
+            }
+        }
+
+        closedir($handle);
+        sort($migrations);
+
+        return $migrations;
+    }
+
     // Protected Methods
     // =========================================================================
+
+   /**
+     * Instantiates and returns the plugin’s migration, if it exists.
+     * Modified createInstallMigration method
+     *
+     * @return Migration|null The plugin’s migration
+     */
+    protected function instantiateMigration($name)
+    {
+        $migrator = $this->getMigrator();
+        $class = $migrator->migrationNamespace . '\\' . $name;
+        return new $class;
+    }
 
     /**
      * @inheritdoc

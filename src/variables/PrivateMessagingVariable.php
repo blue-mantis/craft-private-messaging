@@ -41,6 +41,14 @@ class PrivateMessagingVariable
     }
 
     /**
+     * @return array
+     */
+    public function threads()
+    {
+        return PrivateMessaging::$plugin->privateMessagingService->getThreads();
+    }
+
+    /**
      * @return integer
      */
     public function totalMessageCount()

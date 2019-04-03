@@ -39,6 +39,7 @@ class PrivateMessagingTwigExtension extends \Twig_Extension
     {
         return [
             new \Twig_SimpleFilter('getPrivateMessage', [$this, 'getPrivateMessage']),
+            new \Twig_SimpleFilter('getPrivateMessageThread', [$this, 'getPrivateMessageThread']),
         ];
     }
 
@@ -51,5 +52,16 @@ class PrivateMessagingTwigExtension extends \Twig_Extension
     public function getPrivateMessage($id) {
       $message = PrivateMessaging::$plugin->privateMessagingService->getMessage($id);
       return $message;
+    }
+
+     /**
+     * Get thread from id
+     *
+     * @param int $id
+     * @return object $thread
+     */
+    public function getPrivateMessageThread($id) {
+      $thread = PrivateMessaging::$plugin->privateMessagingService->getThread($id);
+      return $thread;
     }
 }
