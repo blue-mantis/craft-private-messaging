@@ -1,5 +1,5 @@
 # Craft Private Messaging
-A Craft CMS plugin. Grant your site users the power of communication, via private messaging!
+A Craft 3 CMS plugin. Grant your site users the power of communication, via private messaging!
 
 ![screenshot](http://i.imgur.com/QPGKwOi.png)
 
