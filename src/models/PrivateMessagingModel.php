@@ -127,7 +127,7 @@ class PrivateMessagingModel extends Model
             ['body', 'string'],
             ['recipientId', 'exist', 'targetClass' => User::class, 'targetAttribute' => ['recipientId' => 'id']],
             ['recipientId', 'integer', 'message' => 'You need to select recipient'],
-            ['threadId', 'exist', 'targetClass' => PrivateMessagingThreadsRecord::class, 'targetAttribute' => ['recipientId' => 'id']],
+            ['threadId', 'exist', 'targetClass' => PrivateMessagingThreadsRecord::class, 'targetAttribute' => ['threadId' => 'id']],
         ];
     }
 
