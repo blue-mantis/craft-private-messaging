@@ -93,13 +93,13 @@ class PrivateMessagingService extends Component
       if (!Craft::$app->getUser()) return [];
 
       $conditions = ['or',
-        ['craft_private_messaging.recipientId' => Craft::$app->getUser()->getId()],
-        ['craft_private_messaging.senderId' => Craft::$app->getUser()->getId()]
+        ['{{%private_messaging}}.recipientId' => Craft::$app->getUser()->getId()],
+        ['{{%private_messaging}}.senderId' => Craft::$app->getUser()->getId()]
       ];
 
       $records = PrivateMessagingThreadsRecord::find()
         ->joinWith(['messages'])
-        ->where(['craft_private_messaging_threads.siteId' => Craft::$app->sites->getCurrentSite()->id])
+        ->where(['{{%private_messaging_threads}}.siteId' => Craft::$app->sites->getCurrentSite()->id])
         ->andWhere($conditions)
         ->orderBy(['id' => SORT_DESC])
         ->all();
@@ -118,15 +118,15 @@ class PrivateMessagingService extends Component
       if (!Craft::$app->getUser()) return [];
 
       $conditions = ['or',
-        ['craft_private_messaging.recipientId' => Craft::$app->getUser()->getId()],
-        ['craft_private_messaging.senderId' => Craft::$app->getUser()->getId()]
+        ['{{%private_messaging}}.recipientId' => Craft::$app->getUser()->getId()],
+        ['{{%private_messaging}}.senderId' => Craft::$app->getUser()->getId()]
       ];
 
       $thread = PrivateMessagingThreadsRecord::find()
         ->joinWith(['messages'])
         ->where([
-          'craft_private_messaging_threads.siteId' => Craft::$app->sites->getCurrentSite()->id,
-          'craft_private_messaging_threads.id' => $id])
+          '{{%private_messaging_threads}}.siteId' => Craft::$app->sites->getCurrentSite()->id,
+          '{{%private_messaging_threads}}.id' => $id])
         ->andWhere($conditions)
         ->one();
 

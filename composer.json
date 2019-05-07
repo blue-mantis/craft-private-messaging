@@ -2,7 +2,7 @@
     "name": "bluemantis/private-messaging",
     "description": "Allows sending private messages between users",
     "type": "craft-plugin",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "keywords": [
         "craft",
         "cms",
